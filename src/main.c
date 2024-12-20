@@ -53,7 +53,11 @@ int main(int argc, char** argv) {
     error(E_DBG, "token list:\n");
     for (int i = 0; i < tokens->len; i++) {
         Token t = tokens->list[i];
-        fprintf(stderr, "  %02d: %d\n", i, t.type);
+        char* tkn[] = {"invalid","int","return","l_int","(",")","[","]","{","}","ident","EOL","EOF"};
+        fprintf(stderr, "%4d: %s ", i, tkn[t.type]);
+        if (t.type == T_IDENT) fprintf(stderr, "%s", t.str);
+        if (t.type == T_LIT_INT) fprintf(stderr, "%d", t.u32);
+        fprintf(stderr, "\n");
     }
     
     exit(0);

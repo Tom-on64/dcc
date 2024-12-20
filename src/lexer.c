@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #include "error.h"
@@ -28,12 +29,10 @@ TokenList* lex(char* file) {
             T.row++;
         }
 
-        if (isspace(c)); // Skip whitespace
+        if (isspace(c)) T.idx++; // Skip whitespace
         else if (isalpha(c) || c == '_') lexIdent();
         else if (isdigit(c)) lexInt();
         else lexSpecial();
-
-        T.idx++;
     }
 
     Token endoffile = { T_EOF, { 0 }, T.row, T.col };
@@ -43,11 +42,61 @@ TokenList* lex(char* file) {
 }
 
 void lexIdent() {
+    Token t = { 0 };
+    t.row = T.row;
+    t.col = T.col;
 
+    char c = T.file[T.idx];
+    if (!isalpha(c) && c != '_') error(E_ERR, "expected identifier.\n");
+
+    char* str = malloc(MAX_IDENT_LEN);
+    int i = 0;
+
+    while (isalnum(c) || c == '_') {
+        str[i++] = c;
+        c = T.file[++T.idx];
+    }
+
+    // TODO: Optimization: skip because a no keywords contain a digit
+    if (lexKeyword(str)) return;
+
+    t.type = T_IDENT;
+    t.str = str;
+
+    addToken(T.tokens, t);
+}
+
+int lexKeyword(char* str) {
+    Token t = { 0 };
+    t.row = T.row;
+    t.col = T.col - strlen(str);
+
+    if      (strcmp(str, "int"      ) == 0) t.type = T_INT;
+    else if (strcmp(str, "return"   ) == 0) t.type = T_RETURN;
+    else return 0;
+
+    free(str);
+    addToken(T.tokens, t);
+    return 1;
 }
 
 void lexInt() {
-    char str[64] = { 0 };
+    Token t = { 0 };
+    t.row = T.row;
+    t.col = T.col;
+    t.type = T_LIT_INT;
+
+    char c = T.file[T.idx];
+    if (!isdigit(c)) error(E_ERR, "expected integer.\n");
+
+    unsigned int x = 0;
+    while (isdigit(c)) {
+        x = (x*10) + (c-'0');
+        c = T.file[++T.idx];
+    }
+
+    t.u32 = x;
+    addToken(T.tokens, t);
 }
 
 void lexSpecial() {
@@ -61,20 +110,15 @@ void lexSpecial() {
     switch (c) {
         case '(': t.type = T_LPAREN; break;
         case ')': t.type = T_RPAREN; break;
-        // case '[': t.type = T_LBRACE; break;
-        // case ']': t.type = T_LBRACE; break;
+        case '[': t.type = T_LBRACKET; break;
+        case ']': t.type = T_LBRACKET; break;
         case '{': t.type = T_LBRACE; break;
         case '}': t.type = T_RBRACE; break;
         case ';': t.type = T_EOL; break;
-        default: error(E_ERR, "unexpected character at %d:%d.", T.row, T.col); break;
+        default: error(E_ERR, "unexpected character at %d:%d.\n", T.row, T.col); break;
     }
 
     addToken(T.tokens, t);
-}
-
-void lexerExpect(FILE* file, char c) {
-    char exp = fgetc(file);
-    if (exp != c) error(E_ERR, "expected '%c' at %d:%d.", c, T.row, T.col);
 }
 
 void freeTokenList(TokenList* tokens) {

@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #define DEF_TKNLIST_LEN 16
+#define MAX_IDENT_LEN   64  // Includes terminating NULL
 
 /* Token Types */
 typedef enum {
@@ -17,10 +18,12 @@ typedef enum {
     T_LIT_INT,
 
     /* Special */
-    T_LBRACE,
-    T_RBRACE,
     T_LPAREN,
     T_RPAREN,
+    T_LBRACKET,
+    T_RBRACKET,
+    T_LBRACE,
+    T_RBRACE,
 
     /* Misc. */
     T_IDENT,
@@ -50,6 +53,7 @@ typedef struct {
 TokenList* lex(char* file);
 
 void lexIdent();
+int lexKeyword(char* str);
 void lexInt();
 void lexSpecial();
 
