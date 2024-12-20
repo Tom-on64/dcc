@@ -32,22 +32,30 @@ int main(int argc, char** argv) {
     // Check if user entered a file
     if (infile == NULL) error(E_ERR, "no input file given.\n");
 
-    // Read file
+    // Open file
     FILE* fp = fopen(infile, "r");
     if (fp == NULL) error(E_ERR, "input file not found.\n");
+
+    // Get file length
     fseek(fp, 0, SEEK_END);
     long fsize = ftell(fp);
     rewind(fp);
 
-    char* buf = malloc(fsize + 1);
+    // Read file into buffer
+    char* buf = malloc(fsize + 1); // One extra for null terminator
     if (fread(buf, fsize, 1, fp) != 1) error(E_ERR, "failed to read file.\n");
     fclose(fp);
-    buf[fsize] = '\0';
 
     // Lexer
+    TokenList* tokens = lex(buf);
+
+    // Print tokens
+    error(E_DBG, "token list:\n");
+    for (int i = 0; i < tokens->len; i++) {
+        Token t = tokens->list[i];
+        fprintf(stderr, "  %02d: %d\n", i, t.type);
+    }
     
-    
-    free(buf);
-    return 0;
+    exit(0);
 }
 

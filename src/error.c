@@ -18,12 +18,12 @@ int verror(int errtype, char* fmt, va_list va) {
     ret += fprintf(stderr, "%s: ", err_exename);
     
     switch (errtype) {
-        case E_ERR: ret += fprintf(stderr, "\x1b[31;1mError: \x1b[0m"); break;
-        case E_WRN: ret += fprintf(stderr, "\x1b[33;1mWarning: \x1b[0m"); break;
-        case E_DBG: ret += fprintf(stderr, "\x1b[32;1mDebug: \x1b[0m"); break;
+        case E_ERR: ret += fprintf(stderr, "\x1b[31;1merror: \x1b[0m"); break;
+        case E_WRN: ret += fprintf(stderr, "\x1b[35;1mwarning: \x1b[0m"); break;
+        case E_DBG: ret += fprintf(stderr, "\x1b[32;1mdebug: \x1b[0m"); break;
     }
 
-    ret += vprintf(fmt, va);
+    ret += vfprintf(stderr, fmt, va);
     if (errtype == E_ERR) exit(1);
 
     return ret;
