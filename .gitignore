@@ -1,0 +1,15 @@
+.DS_Store
+
+# Outputs
+*.o
+*.out
+*.elf
+*.bin
+*.s
+*.asm
+bin
+
+# Vim stuff
+*.swp
+*.swo
+
